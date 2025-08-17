@@ -482,12 +482,20 @@ Position: Long shares and Jan 20XX calls
                 return results
             except Exception as e:
                 logging.error(f"Error searching posts: {e}")
-                return self._get_simulated_search_results(query, limit)
+                return self._get_simulated_search_results(query, limit, subreddit)
         else:
-            return self._get_simulated_search_results(query, limit)
-    
-    def _get_simulated_search_results(self, query, limit):
-        """Generate simulated search results when API is not available"""
+            return self._get_simulated_search_results(query, limit, subreddit)
+
+    def _get_simulated_search_results(self, query, limit, subreddit=None):
+        """Generate simulated search results when API is not available.
+
+        Args:
+            query (str): Search query.
+            limit (int): Maximum number of results to return.
+            subreddit (str, optional): Limit search results to a specific
+                subreddit. If ``None``, results will come from random
+                financial subreddits.
+        """
         results = []
         
         # Convert query to uppercase to match stock tickers
@@ -532,9 +540,9 @@ Position: Long shares and Jan 20XX calls
         base_date = datetime.datetime.now()
         
         for i in range(limit):
-            # Choose random subreddit
-            subreddit = random.choice(self.financial_subreddits)
-            
+            # Choose subreddit based on parameter or randomly select one
+            current_subreddit = subreddit or random.choice(self.financial_subreddits)
+
             # Choose random title
             title = random.choice(title_templates)
             
@@ -551,14 +559,14 @@ Position: Long shares and Jan 20XX calls
                 'id': f'search{i}',
                 'title': title,
                 'selftext': selftext,
-                'url': f'https://reddit.com/r/{subreddit}/comments/search{i}/',
-                'subreddit': subreddit,
+                'url': f'https://reddit.com/r/{current_subreddit}/comments/search{i}/',
+                'subreddit': current_subreddit,
                 'author': f'user{random.randint(100, 9999)}',
                 'created_utc': post_date,
                 'score': random.randint(5, 3000),
                 'upvote_ratio': random.uniform(0.6, 0.98),
                 'num_comments': random.randint(0, 300),
-                'permalink': f'/r/{subreddit}/comments/search{i}/'
+                'permalink': f'/r/{current_subreddit}/comments/search{i}/'
             }
             
             results.append(post)
