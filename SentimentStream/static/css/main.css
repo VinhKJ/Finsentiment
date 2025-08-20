@@ -16,6 +16,11 @@
     --reddit-upvote: #d82d00;
     --reddit-downvote: #2E8B57;
     --reddit-border: #EDEFF1;
+
+    /* Fintech theme */
+    --fintech-dark: #0d1b2a;
+    --fintech-blue: #1b263b;
+    --premium-gold: #ffb703;
     
     /* Sentiment colors */
     --sentiment-positive: #2E8B57;
@@ -56,7 +61,7 @@ a:hover {
 
 /* Main layout components */
 .header {
-    background-color: var(--reddit-black);
+    background: linear-gradient(90deg, var(--fintech-dark), var(--fintech-blue));
     border-bottom: 1px solid var(--reddit-border);
     height: 48px;
     display: flex;
@@ -483,6 +488,37 @@ a:hover {
 .btn-orange:hover {
     background-color: #c03f15;
     border-color: #c03f15;
+}
+
+.btn-premium {
+    background-color: var(--premium-gold);
+    color: var(--reddit-black);
+    border-color: var(--premium-gold);
+}
+
+.btn-premium:hover {
+    background-color: #e0a800;
+    border-color: #e0a800;
+    color: var(--reddit-black);
+}
+
+.pricing-card {
+    background-color: white;
+    border: 1px solid var(--reddit-border);
+    border-radius: 8px;
+    padding: var(--space-lg);
+    text-align: center;
+}
+
+.pricing-card.premium {
+    border-color: var(--premium-gold);
+    box-shadow: 0 0 10px rgba(255, 183, 3, 0.3);
+}
+
+.pricing-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: var(--space-md);
 }
 
 /* Utilities */
