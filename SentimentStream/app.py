@@ -349,6 +349,11 @@ def stock_list():
 def about():
     return render_template('about.html')
 
+
+@app.route('/premium')
+def premium():
+    return render_template('premium.html')
+
 # Error handlers
 @app.errorhandler(404)
 def page_not_found(e):

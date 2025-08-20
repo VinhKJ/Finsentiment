@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}FinSentiment Premium{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <h1 class="mb-4 text-center">Choose Your Plan</h1>
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <div class="pricing-card">
+        <div class="pricing-title">Freemium</div>
+        <p>Basic access to sentiment insights and trending posts.</p>
+        <ul class="text-start">
+          <li>Community-driven discussions</li>
+          <li>Delayed market data</li>
+          <li>Limited search history</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-6 mb-4">
+      <div class="pricing-card premium">
+        <div class="pricing-title">Premium</div>
+        <p>Unlock advanced analytics and real-time market data.</p>
+        <ul class="text-start">
+          <li>Real-time sentiment updates</li>
+          <li>Comprehensive stock analytics</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="#" class="btn btn-premium mt-2">Upgrade Now</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
