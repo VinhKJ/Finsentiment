@@ -9,3 +9,4 @@ requests
 gunicorn
 flask_sqlalchemy
 yfinance
+psycopg2
