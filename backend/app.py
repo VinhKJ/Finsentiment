@@ -1,11 +1,25 @@
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
 from reddit_fetcher import RedditFetcher
 from sentiment_analyzer import SentimentAnalyzer
 from stock_data_fetcher import StockDataFetcher
 
 app = Flask(__name__)
 CORS(app)
+
+# Get DATABASE_URL from environment
+database_url = os.environ.get('DATABASE_URL')
+
+# Adjust for deprecated postgres scheme
+if database_url and database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
 
 reddit_fetcher = RedditFetcher()
 sentiment_analyzer = SentimentAnalyzer()
@@ -43,6 +57,10 @@ def api_stocks():
             'sentiment': avg_sentiment
         })
     return jsonify(stocks)
+
+@app.route('/')
+def health_check():
+    return jsonify(status="ok"), 200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
