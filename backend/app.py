@@ -4,11 +4,9 @@ from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 try:  # pragma: no cover - support package and script execution
     from .reddit_fetcher import RedditFetcher
-    from .sentiment_analyzer import SentimentAnalyzer
     from .stock_data_fetcher import StockDataFetcher
 except ImportError:
     from reddit_fetcher import RedditFetcher
-    from sentiment_analyzer import SentimentAnalyzer
     from stock_data_fetcher import StockDataFetcher
 
 app = Flask(__name__)
@@ -33,18 +31,36 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 reddit_fetcher = RedditFetcher()
-sentiment_analyzer = SentimentAnalyzer()
 stock_data_fetcher = StockDataFetcher()
+
+from models import Post  # noqa: E402
 
 @app.route('/api/posts')
 def api_posts():
-    subreddit = request.args.get('subreddit', 'wallstreetbets')
-    time_period = request.args.get('time_period', 'day')
-    sort_by = request.args.get('sort_by', 'hot')
-    posts = reddit_fetcher.get_posts(subreddit, time_period, sort_by, limit=25)
-    for post in posts:
-        post['sentiment'] = sentiment_analyzer.analyze_text(post['title'] + ' ' + post['selftext'])
-    return jsonify(posts)
+    posts_from_db = (
+        Post.query.order_by(Post.created_utc.desc()).limit(25).all()
+    )
+    posts_json = [
+        {
+            'title': post.title,
+            'selftext': post.selftext,
+            'url': post.url,
+            'subreddit': post.subreddit,
+            'author': post.author,
+            'created_utc': post.created_utc.isoformat()
+            if post.created_utc else None,
+            'score': post.score,
+            'num_comments': post.num_comments,
+            'sentiment': {
+                'positive': post.sentiment_positive,
+                'negative': post.sentiment_negative,
+                'neutral': post.sentiment_neutral,
+                'compound': post.sentiment_compound,
+            },
+        }
+        for post in posts_from_db
+    ]
+    return jsonify(posts_json)
 
 @app.route('/api/stocks')
 def api_stocks():
