@@ -18,8 +18,13 @@ class Base(DeclarativeBase):
 # Initialize Flask extensions
 db = SQLAlchemy(model_class=Base)
 
-# Create Flask app
-app = Flask(__name__)
+# Create Flask app with frontend assets
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, "..", "frontend", "templates"),
+    static_folder=os.path.join(BASE_DIR, "..", "frontend", "static"),
+)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
