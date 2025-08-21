@@ -1,8 +1,11 @@
 from app import db
 from datetime import datetime
 
+# Expose the base model for use outside of the Flask context
+Base = db.Model
 
-class Post(db.Model):
+
+class Post(Base):
     id = db.Column(db.String(10), primary_key=True)
     title = db.Column(db.String(300), nullable=False)
     selftext = db.Column(db.Text)
@@ -26,7 +29,7 @@ class Post(db.Model):
         return f'<Post {self.id}: {self.title}>'
 
 
-class Comment(db.Model):
+class Comment(Base):
     id = db.Column(db.String(10), primary_key=True)
     body = db.Column(db.Text, nullable=False)
     author = db.Column(db.String(50))
@@ -50,7 +53,7 @@ class Comment(db.Model):
         return f'<Comment {self.id}>'
 
 
-class SentimentData(db.Model):
+class SentimentData(Base):
     id = db.Column(db.Integer, primary_key=True)
     entity = db.Column(db.String(100), nullable=False, index=True)
     date = db.Column(db.Date, nullable=False)
@@ -74,3 +77,14 @@ class SentimentData(db.Model):
     
     def __repr__(self):
         return f'<SentimentData {self.entity} on {self.date}>'
+
+
+class Stock(Base):
+    symbol = db.Column(db.String(10), primary_key=True)
+    name = db.Column(db.String(100))
+    price = db.Column(db.Float)
+    sector = db.Column(db.String(100))
+    sentiment = db.Column(db.Float)
+
+    def __repr__(self):
+        return f'<Stock {self.symbol}>'

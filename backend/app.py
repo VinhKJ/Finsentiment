@@ -33,7 +33,7 @@ db = SQLAlchemy(app)
 reddit_fetcher = RedditFetcher()
 stock_data_fetcher = StockDataFetcher()
 
-from models import Post  # noqa: E402
+from models import Post, Stock  # noqa: E402
 
 @app.route('/api/posts')
 def api_posts():
@@ -64,26 +64,18 @@ def api_posts():
 
 @app.route('/api/stocks')
 def api_stocks():
-    popular_stocks = [
-        'AAPL', 'MSFT', 'GOOG', 'AMZN', 'TSLA',
-        'META', 'NVDA', 'SPY', 'QQQ', 'AMD'
+    stocks_from_db = Stock.query.all()
+    stocks_json = [
+        {
+            'symbol': stock.symbol,
+            'name': stock.name,
+            'price': stock.price,
+            'sector': stock.sector,
+            'sentiment': stock.sentiment,
+        }
+        for stock in stocks_from_db
     ]
-    stocks = []
-    for symbol in popular_stocks:
-        company_info = stock_data_fetcher.get_stock_overview(symbol)
-        price_data = stock_data_fetcher.get_daily_prices(symbol, days=1)
-        latest_price = price_data[0]['close'] if price_data else None
-        sentiment_data = reddit_fetcher.get_historical_sentiment(symbol, days=7)
-        sentiments = [d.get('sentiment_avg', 0) for d in sentiment_data]
-        avg_sentiment = sum(sentiments) / len(sentiments) if sentiments else 0
-        stocks.append({
-            'symbol': symbol,
-            'name': company_info.get('name', f'{symbol} Inc.'),
-            'price': latest_price,
-            'sector': company_info.get('sector', 'Technology'),
-            'sentiment': avg_sentiment
-        })
-    return jsonify(stocks)
+    return jsonify(stocks_json)
 
 @app.route('/')
 def health_check():
