@@ -7,7 +7,11 @@ import re
 from dateutil.relativedelta import relativedelta
 import pandas as pd
 import numpy as np
-from sentiment_analyzer import SentimentAnalyzer
+
+try:  # pragma: no cover - support package and script execution
+    from .sentiment_analyzer import SentimentAnalyzer
+except ImportError:
+    from sentiment_analyzer import SentimentAnalyzer
 
 class RedditFetcher:
     def __init__(self):

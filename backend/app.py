@@ -2,9 +2,14 @@ import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-from reddit_fetcher import RedditFetcher
-from sentiment_analyzer import SentimentAnalyzer
-from stock_data_fetcher import StockDataFetcher
+try:  # pragma: no cover - support package and script execution
+    from .reddit_fetcher import RedditFetcher
+    from .sentiment_analyzer import SentimentAnalyzer
+    from .stock_data_fetcher import StockDataFetcher
+except ImportError:
+    from reddit_fetcher import RedditFetcher
+    from sentiment_analyzer import SentimentAnalyzer
+    from stock_data_fetcher import StockDataFetcher
 
 app = Flask(__name__)
 CORS(app)
@@ -15,6 +20,12 @@ database_url = os.environ.get('DATABASE_URL')
 # Adjust for deprecated postgres scheme
 if database_url and database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+# Fallback to SQLite if no database is configured. This allows the module to
+# be imported in environments where a database URL hasn't been provided (e.g.,
+# generating data snapshots).
+if not database_url:
+    database_url = 'sqlite:///finsentiment.db'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
