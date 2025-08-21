@@ -18,11 +18,14 @@ class RedditFetcher:
         """Initialize the Reddit API connection"""
         try:
             # Try to initialize with real Reddit API credentials
+            # file: reddit_fetcher.py
+
             self.reddit = praw.Reddit(
-                client_id='_SyfM0uJczgcOJzgLQAB2Q',
-                client_secret="2Y2oi4l3K7YKEL379Fgx5iaz_2PO6A",
-                user_agent="u/GeneWinter8043"
+                client_id=os.environ.get('PRAW_CLIENT_ID'),
+                client_secret=os.environ.get('PRAW_CLIENT_SECRET'),
+                user_agent=os.environ.get('PRAW_USER_AGENT')
             )
+            
             self.use_real_api = True
             logging.info("Using real Reddit API")
         except Exception as e:
