@@ -1,4 +1,4 @@
-from app import db
+from database import db
 from datetime import datetime
 
 # Expose the base model for use outside of the Flask context
