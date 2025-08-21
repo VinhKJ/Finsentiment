@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const spinnerHTML = `
             <div class="spinner-overlay">
                 <div class="spinner-container">
-                    <img src="/static/images/loading.gif" alt="Loading..." class="spinner-gif">
+                    <img src="loading.gif" alt="Loading..." class="spinner-gif">
                     <div class="spinner-message">Loading market data...</div>
                 </div>
             </div>

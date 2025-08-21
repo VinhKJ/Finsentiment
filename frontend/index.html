@@ -1,42 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Finsentiment</title>
-  <link rel="stylesheet" href="static/css/normalize.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="static/css/main.css" />
-  <link rel="stylesheet" href="static/css/spinner.css" />
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Noto+Sans:wght@400;500;600;700&display=swap"
-  />
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-  />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinSentiment - Financial Market Sentiment Analysis</title>
+
+  <link rel="stylesheet" href="normalize.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="spinner.css">
+  <link rel="stylesheet" href="themes.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Noto+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <h1>Finsentiment Posts</h1>
-  <div id="posts">Loading...</div>
+  <header class="header">
+    <div class="logo">
+      <span>
+        <img src="logoreddit.png" alt="Reddit Financial King" width="40" height="40" style="vertical-align: middle;">
+        <span class="logo-text">FinSentiment</span>
+      </span>
+    </div>
+    <form id="search-form" class="search-bar">
+      <input type="text" name="q" placeholder="Search financial topics, stocks, companies...">
+      <i class="fas fa-search search-icon"></i>
+    </form>
+    <div class="user-controls">
+      <a href="#" class="btn btn-secondary">Home</a>
+      <a href="#" class="btn btn-secondary">Trends</a>
+      <a href="#" class="btn btn-secondary">Stocks</a>
+      <a href="#" class="btn btn-secondary">About</a>
+    </div>
+  </header>
+
+  <div id="error-container" class="alert alert-danger" style="display: none; width: 100%; position: fixed; top: 70px; z-index: 1000;"></div>
+
+  <div class="main-container">
+    <div class="content">
+      <div class="filter-bar">
+        <div class="filter-group">
+          <span class="filter-label">Subreddit:</span>
+          <select id="subreddit" class="filter-select">
+            <option value="wallstreetbets">r/wallstreetbets</option>
+            <option value="investing">r/investing</option>
+            <option value="stocks">r/stocks</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">Time:</span>
+          <select id="time_period" class="filter-select">
+            <option value="day">Today</option>
+            <option value="week">This Week</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">Sort:</span>
+          <select id="sort_by" class="filter-select">
+            <option value="hot">Hot</option>
+            <option value="new">New</option>
+            <option value="top">Top</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-content">
+          <h4>Overall Sentiment</h4>
+          <div class="d-flex justify-content-between align-items-center mt-2">
+            <div>
+              <div class="sentiment-tag sentiment-positive">
+                <i class="fas fa-arrow-up mr-1"></i> Positive: <span id="overall-positive">0</span>
+              </div>
+              <div class="sentiment-tag sentiment-neutral mt-1">
+                <i class="fas fa-minus mr-1"></i> Neutral: <span id="overall-neutral">0</span>
+              </div>
+              <div class="sentiment-tag sentiment-negative mt-1">
+                <i class="fas fa-arrow-down mr-1"></i> Negative: <span id="overall-negative">0</span>
+              </div>
+            </div>
+            <div>
+              <a href="#" class="btn btn-primary">
+                <i class="fas fa-chart-line mr-1"></i> View Trends
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="posts"></div>
+    </div>
+
+    <div class="sidebar">
+      <div class="sidebar-card">
+        <div class="sidebar-card-header">About FinSentiment</div>
+        <div class="sidebar-card-content">
+          <p>FinSentiment analyzes financial discussions from Reddit to provide market sentiment data and trends.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer mt-4 p-3 text-center text-muted">
+    <div class="container">
+      <p>&copy; 2025 FinSentiment. All rights reserved.</p>
+      <p class="small">This platform analyzes Reddit content for informational purposes only. Not financial advice.</p>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+  <script src="spinner.js"></script>
+  <script src="chart.js"></script>
   <script>
     const apiUrl = 'https://finsentiment.onrender.com/api/posts';
+
     async function loadPosts() {
       try {
         const res = await fetch(apiUrl);
         const posts = await res.json();
+        let pos = 0, neg = 0, neu = 0;
         const container = document.getElementById('posts');
         container.innerHTML = '';
+
         posts.forEach(p => {
-          const div = document.createElement('div');
-          div.innerHTML = `<h3>${p.title}</h3><p>Sentiment: ${p.sentiment.compound}</p>`;
-          container.appendChild(div);
+          if (p.sentiment.compound >= 0.05) pos++;
+          else if (p.sentiment.compound <= -0.05) neg++;
+          else neu++;
+
+          const sentimentClass = getSentimentClass(p.sentiment.compound);
+          const icon = sentimentClass === 'sentiment-positive' ? 'fa-arrow-up' : (sentimentClass === 'sentiment-negative' ? 'fa-arrow-down' : 'fa-minus');
+
+          const postEl = document.createElement('div');
+          postEl.className = 'post';
+          postEl.innerHTML = `
+            <div class="post-votes">
+              <button class="vote-button upvote"><i class="fas fa-arrow-up"></i></button>
+              <div class="vote-count">${p.score}</div>
+              <button class="vote-button downvote"><i class="fas fa-arrow-down"></i></button>
+            </div>
+            <div class="post-content">
+              <div class="post-meta">
+                <a href="#">r/${p.subreddit}</a> • Posted by u/${p.author} • ${formatRelativeDate(p.created_utc)}
+                <span class="sentiment-tag ${sentimentClass}">
+                  <i class="fas ${icon}"></i> ${getSentimentText(p.sentiment.compound)}
+                </span>
+              </div>
+              <h2 class="post-title">${p.title}</h2>
+              ${p.selftext ? `<div class="post-text">${p.selftext.slice(0,500)}${p.selftext.length>500?'<div class=\"post-text-fade\"></div>' : ''}</div>` : ''}
+              ${p.selftext && p.selftext.length>500 ? '<button class="expand-button">Read more</button>' : ''}
+              <div class="post-actions">
+                <div class="post-action" data-action="comment">
+                  <i class="far fa-comment-alt"></i>
+                  <span>${p.num_comments} Comments</span>
+                </div>
+                <div class="post-action" data-action="share">
+                  <i class="fas fa-share"></i>
+                  <span>Share</span>
+                </div>
+                <div class="post-action" data-action="save">
+                  <i class="far fa-bookmark"></i>
+                  <span>Save</span>
+                </div>
+              </div>
+            </div>`;
+          container.appendChild(postEl);
         });
+
+        document.getElementById('overall-positive').textContent = pos;
+        document.getElementById('overall-neutral').textContent = neu;
+        document.getElementById('overall-negative').textContent = neg;
+
+        initVoteButtons();
+        initExpandTextButtons();
+        initPostActions();
       } catch (err) {
-        document.getElementById('posts').innerText = 'Failed to load posts';
+        const error = document.getElementById('error-container');
+        error.style.display = 'block';
+        error.textContent = 'Failed to load posts';
       }
     }
-    loadPosts();
+
+    document.addEventListener('DOMContentLoaded', loadPosts);
   </script>
 </body>
 </html>
