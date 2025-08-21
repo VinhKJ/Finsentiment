@@ -1,6 +1,9 @@
 import os
 import logging
 from datetime import datetime
+
+import pandas as pd  # noqa: F401
+import nltk  # noqa: F401
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
