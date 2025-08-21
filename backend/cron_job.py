@@ -36,7 +36,7 @@ def fetch_and_store_posts(db_session):
 
     for data in posts_data:
         sentiment = analyzer.analyze_text(f"{data.get('title', '')} {data.get('selftext', '')}")
-        created_dt = datetime.fromtimestamp(data.get("created_utc")) if data.get("created_utc") else None
+        created_dt = data.get("created_utc")
 
         post = Post(
             id=data.get("id"), title=data.get("title"), selftext=data.get("selftext"),
